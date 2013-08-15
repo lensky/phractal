@@ -140,25 +140,44 @@
 (defclass c-or (combinator)
   ((combinators :reader combinators
                 :initarg :combinators
-                :initform (error "Must supply combinators."))))
+                :initform (error "Must supply combinators."))
+   (recursive-combinators :reader recursive-combinators
+                          :initarg :recursive-combinators
+                          :initform '())))
 
-;; Note that this must implement laziness for recursive definitions to make sense
 (def-comb->lisp (c-or input state succeed fail
-                      :value-slots (combinators)
-                      :vars (helper c-gen c-res remaining-cs))
-  `(let ((,c-gen (funcall ,(compile-combinator (car combinators)) ,input ,state))
-         (,remaining-cs (list ,@(cdr combinators))))
-     (labels ((,helper ()
-                (let ((,c-res (funcall ,c-gen)))
-                  (if (c-success-p ,c-res)
-                      (,succeed (value ,c-res) (remainder ,c-res) (state ,c-res))
-                      (if (null ,remaining-cs)
-                          (,fail ,input ,state)
-                          (progn
-                            (setf ,c-gen (funcall (compile-combinator (car ,remaining-cs)) ,input ,state))
-                            (setf ,remaining-cs (cdr ,remaining-cs))
-                            (,helper)))))))
-       #',helper)))
+                      :value-slots (combinators recursive-combinators)
+                      :vars (prev-fail helper c-gen c-res remaining-cs reached-recursive))
+  (let ((compiled (mapcar
+                   #'compile-combinator
+                   combinators)))
+    `(let ((,c-gen nil)
+           (,remaining-cs (list ,@compiled))
+           (,reached-recursive nil))
+       (labels ((,helper (,prev-fail)
+                  (if ,prev-fail
+                      (if ,reached-recursive
+                          (if (null ,remaining-cs)
+                              (,fail ,input ,state)
+                              (progn
+                                (setf ,c-gen (funcall (compile-combinator (car ,remaining-cs))
+                                                      ,input ,state))
+                                (setf ,remaining-cs (cdr ,remaining-cs))
+                                (,helper nil)))
+                          (if (null ,remaining-cs)
+                              (progn
+                                (setf ,remaining-cs (list ,@recursive-combinators))
+                                (setf ,reached-recursive t)
+                                (,helper t))
+                              (progn
+                                (setf ,c-gen (funcall (car ,remaining-cs) ,input ,state))
+                                (setf ,remaining-cs (cdr ,remaining-cs))
+                                (,helper nil))))
+                      (let ((,c-res (funcall ,c-gen)))
+                        (if (c-success-p ,c-res)
+                            (,succeed (value ,c-res) (remainder ,c-res) (state ,c-res))
+                            (,helper t))))))
+         (lambda () (,helper t))))))
 
 (defclass c-and (combinator)
   ((combinators :reader combinators

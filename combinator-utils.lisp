@@ -42,8 +42,9 @@
                  :succeed succeed
                  :fail fail))
 
-(defun make-or-comb (combinators succeed fail &key (base-class 'c-or))
+(defun make-or-comb (combinators succeed fail &key (base-class 'c-or) (recursive-combinators '()))
   (make-instance base-class
                  :combinators combinators
+                 :recursive-combinators recursive-combinators
                  :succeed succeed
                  :fail fail))
