@@ -1,7 +1,8 @@
 (defpackage #:phractal
   (:use #:cl
         #:iterate
-        #:water
+        #:water.macro
+        #:water.g/=
         #:let-plus
         #:anaphora)
   (:export :combinator
@@ -55,7 +56,8 @@
 (defpackage #:phractal.pattern-matching
   (:use #:cl
         #:phractal
-        #:water
+        #:water.macro
+        #:water.g/=
         #:anaphora
         #:let-plus)
   (:export :combinator-result
