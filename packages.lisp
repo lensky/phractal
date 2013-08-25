@@ -1,83 +1,41 @@
 (defpackage #:phractal
   (:use #:cl
-        #:iterate
-        #:water.macro
-        #:water.g/=
-        #:let-plus
-        #:anaphora)
-  (:export :combinator
-           :succeed
-           :fail
-           :combinator-p
-           :combinator-modifier
-           :combinator
-           :combinator-result
+        #:water.macro)
+  (:export :combinator-failure
+           :combiantor-succeess
+           :value
            :remainder
            :state
-           :combinator-success
-           :value
-           :combinator-failure
-           :reason
-           :c-failure-p
-           :c-success-p)
-  (:export :combinator->lisp
-           :def-comb->lisp
-           :compile-combinator)
-  (:export :c-start
-           :start-p
-           :start-value
+           :defcombinator
+           :if-c-success
+           :try-again
+           :c-start
            :c-end
-           :end-p
-           :end-value
            :c-terminal
-           :has-terminal-p
-           :get-terminal
-           :get-remainder
            :c-predicate
-           :predicate
-           :c-terminal-combinator
-           :c-terminal-value
-           :value
-           :fn=
+           :c-subcombinator
            :c-star
-           :c-or
            :c-and
-           :combinators)
-  (:export :make-simple-succeed
-           :*id-succeed*
-           :make-simple-fail
-           :*id-fail*
-           :make-predicate-comb
-           :make-term-val-comb
-           :make-star-comb
-           :make-and-comb
-           :make-or-comb))
+           :c-or
+           :c-plus
+           :with-id-success
+           :all-values
+           :first-value))
+
+(defpackage #:phractal.list-utils
+  (:use #:cl
+        #:phractal)
+  (:export :c-list-start
+           :c-list-end
+           :c-list-terminal
+           :c-sublist
+           :c-list))
 
 (defpackage #:phractal.pattern-matching
   (:use #:cl
         #:phractal
-        #:water.macro
-        #:water.g/=
-        #:anaphora
-        #:let-plus)
-  (:export :combinator-result
-           :remainder
-           :state
-           :combinator-success
-           :value
-           :combinator-failure
-           :reason
-           :c-failure-p
-           :c-success-p)
-  (:export :*id-succeed*
-           :*id-fail*)
-  (:export :*basic-list-start*
-           :*basic-list-end*
-           :*basic-list-terminal*
-           :make-list-term-comb-comb
-           :make-list-term-val-comb
-           :make-list-comb
-           :make-sublist-comb)
+        #:phractal.list-utils
+        #:water.g/=)
   (:export :make-literal-var
            :make-atomic-single-var
            :make-listing-var
