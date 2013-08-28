@@ -1,13 +1,18 @@
-(defpackage #:phractal
+(defpackage #:phractal-package
   (:use #:cl
-        #:water.macro)
-  (:export :combinator-failure
-           :combiantor-succeess
-           :value
+        #:screamer))
+
+(in-package #:phractal-package)
+
+(define-screamer-package #:phractal
+  (:use #:cl
+        #:water.macro
+        #:screamer)
+  (:export :value
            :remainder
            :state
+           :call-combinator
            :defcombinator
-           :if-c-success
            :try-again
            :c-start
            :c-end
@@ -22,20 +27,22 @@
            :all-values
            :first-value))
 
-(defpackage #:phractal.list-utils
+(define-screamer-package #:phractal.list-utils
   (:use #:cl
-        #:phractal)
+        #:phractal
+        #:screamer)
   (:export :c-list-start
            :c-list-end
            :c-list-terminal
            :c-sublist
            :c-list))
 
-(defpackage #:phractal.pattern-matching
+(define-screamer-package #:phractal.pattern-matching
   (:use #:cl
         #:phractal
         #:phractal.list-utils
-        #:water.g/=)
+        #:water.g/=
+        #:screamer)
   (:export :make-literal-var
            :make-atomic-single-var
            :make-listing-var

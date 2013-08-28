@@ -2,25 +2,23 @@
 
 (defcombinator c-bindingvar (name combinator set-binding)
     (input state succeed fail)
-  (declare (type function combinator set-binding)
+  (declare (type function set-binding)
            (type symbol name))
-  (if-c-success (combinator input state) result
-    (succeed (value result) (remainder result) (funcall set-binding name state (value result)))
-    (signal result)))
+  (let ((result (call-combinator combinator input state)))
+    (succeed (value result) (remainder result) (funcall set-binding name state (value result)))))
 
 (defcombinator c-single-bindingvar (name combinator set-binding get-binding binding-value eq-predicate)
     (input state succeed fail)
-  (declare (type function combinator set-binding get-binding binding-value eq-predicate)
+  (declare (type function set-binding get-binding binding-value eq-predicate)
            (type symbol name))
-  (if-c-success (combinator input state) result
-    (let ((binding (funcall get-binding name state)))
-      (if binding
-          (let ((binding-value (funcall binding-value binding)))
-            (if (funcall eq-predicate (value result) binding-value)
-                (succeed (value result) (remainder result) (state result))
-                (fail)))
-          (succeed (value result) (remainder result) (funcall set-binding name state (value result)))))
-    (signal result)))
+  (let ((result (call-combinator combinator input state))
+        (binding (funcall get-binding name state)))
+    (if binding
+        (let ((binding-value (funcall binding-value binding)))
+          (if (funcall eq-predicate (value result) binding-value)
+              (succeed (value result) (remainder result) (state result))
+              (fail)))
+        (succeed (value result) (remainder result) (funcall set-binding name state (value result))))))
 
 (defun c-alist-bindingvar (name combinator)
   (c-bindingvar
