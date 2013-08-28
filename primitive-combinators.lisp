@@ -10,7 +10,7 @@
                             (input state succeed fail)
                          &body body)
   (with-gensyms (succeed-fn new-value new-state fn-name)
-    `(defun ,name (,@init-arg-spec &key (recursive-name (gensym)))
+    `(defun ,name (,@init-arg-spec &key (recursive-name nil))
        (declare (optimize (speed 3) (debug 0)))
        (lambda (,succeed-fn)
          (declare (type function ,succeed-fn))
@@ -26,8 +26,10 @@
                       `(signal 'combinator-failure)))
            (labels ((,fn-name (,input ,state)
                       (declare (optimize (speed 3) (debug 0)))
-                      (let ((*tmp-recursive-combinators* (cons (cons recursive-name #',fn-name)
-                                                               *tmp-recursive-combinators*)))
+                      (let ((*tmp-recursive-combinators* (if recursive-name
+                                                             (cons (cons recursive-name #',fn-name)
+                                                                   *tmp-recursive-combinators*)
+                                                             *tmp-recursive-combinators*)))
                         ,@body
                         (,fail))))
              #',fn-name))))))
